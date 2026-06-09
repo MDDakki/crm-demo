@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>future CRM · Manager &amp; Rollen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="manager">
+
+<aside class="side" id="sidebar"></aside>
+
+<div class="main">
+  <header class="topbar">
+    <h1>Manager &amp; Rollen<small>Zugänge &amp; Berechtigungen verwalten</small></h1>
+    <div class="spacer"></div>
+    <div class="actions">
+      <button class="btn-new">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        Neuer Benutzer
+      </button>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- KPI ROW -->
+    <section class="kpis">
+      <div class="kpi b">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg></div>
+        <div class="num" id="kpi-total">0</div>
+        <div class="lbl">Zugänge gesamt</div>
+      </div>
+      <div class="kpi r">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg></div>
+        <div class="num" id="kpi-Admin" style="color:#6b4dff">0</div>
+        <div class="lbl">Admins</div>
+      </div>
+      <div class="kpi b">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg></div>
+        <div class="num" id="kpi-Bearbeiter">0</div>
+        <div class="lbl">Bearbeiter</div>
+      </div>
+      <div class="kpi a">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></div>
+        <div class="num" id="kpi-Leser">0</div>
+        <div class="lbl">Leser</div>
+      </div>
+    </section>
+
+    <!-- Berechtigungs-Karten -->
+    <section class="perm-cards" id="perm-cards"></section>
+
+    <!-- Benutzer-Tabelle -->
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Benutzer &amp; Rollen</h2>
+        <span class="count" id="count">0 Benutzer</span>
+        <div class="mgr-tools">
+          <input id="search" placeholder="Benutzer suchen…">
+          <select id="f-rolle">
+            <option value="">Alle Rollen</option>
+            <option>Admin</option><option>Bearbeiter</option><option>Leser</option>
+          </select>
+          <select id="f-team">
+            <option value="">Alle Teams</option>
+            <option>Leitung</option><option>Koordination</option><option>NLL</option><option>Verwaltung</option><option>Zusätzlich</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Benutzer</th>
+              <th>Team</th>
+              <th>Standort</th>
+              <th>Rolle</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <div class="hint">Rolle direkt in der Zeile ändern · Status-Schalter (de)aktiviert den Zugang · alles wird gespeichert</div>
+    </div>
+
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script src="store.js"></script>
+<script src="layout.js"></script>
+<script src="manager.js"></script>
+</body>
+</html>

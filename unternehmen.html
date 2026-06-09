@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>future CRM · Unternehmen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="unternehmen">
+
+<aside class="side" id="sidebar"></aside>
+
+<div class="main">
+  <header class="topbar">
+    <h1>Unternehmen<small>Praktikumsbetriebe · Stand 02.06.2026</small></h1>
+    <div class="spacer"></div>
+    <div class="actions">
+      <button class="btn-new">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        Neues Unternehmen
+      </button>
+      <button class="icon-btn"><span class="dot"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></button>
+    </div>
+  </header>
+
+  <div class="content">
+    <section class="kpis">
+      <div class="kpi b">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-3"/></svg></div>
+        <div class="num" id="kpi-total">0</div>
+        <div class="lbl">Unternehmen gesamt</div>
+      </div>
+      <div class="kpi g">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></div>
+        <div class="num" id="kpi-aktiv">0</div>
+        <div class="lbl">Aktiv</div>
+      </div>
+      <div class="kpi a">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg></div>
+        <div class="num" id="kpi-koop">0</div>
+        <div class="lbl">Mit Kooperationsvertrag</div>
+      </div>
+      <div class="kpi r">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <div class="num" id="kpi-frei">0</div>
+        <div class="lbl">Praktikumsplätze frei</div>
+      </div>
+    </section>
+
+    <section class="split">
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Unternehmensliste</h2>
+          <span class="count" id="count">0 Unternehmen</span>
+        </div>
+
+        <div class="toolbar">
+          <div class="search-inline">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input id="search" placeholder="Unternehmen suchen (Name, Ort, Fachrichtung, Ansprechpartner)…">
+          </div>
+          <div class="filters">
+            <div class="dd" data-group="fach">
+              <button class="chip">
+                <span class="chip-label">Fachrichtung</span>
+                <span class="clear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18M6 6l12 12"/></svg></span>
+                <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="menu" id="menu-fach"></div>
+            </div>
+            <div class="dd" data-group="ort">
+              <button class="chip">
+                <span class="chip-label">Ort</span>
+                <span class="clear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18M6 6l12 12"/></svg></span>
+                <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="menu" id="menu-ort"></div>
+            </div>
+            <div class="dd" data-group="status">
+              <button class="chip">
+                <span class="chip-label">Plätze</span>    
+                <span class="clear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18M6 6l12 12"/></svg></span>
+                <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="menu" id="menu-status"></div>
+            </div>
+            <div class="dd" data-group="aktiv">
+              <button class="chip">
+                <span class="chip-label">Status</span>
+                <span class="clear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18M6 6l12 12"/></svg></span>
+                <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="menu" id="menu-aktiv"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Unternehmen</th>
+                <th>Fachrichtungen</th>
+                <th>Filialen</th>
+                <th>Kooperation</th>
+                <th>Plätze</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+        <div class="hint">Tipp: Zeile anklicken für Details · Aktiv-Schalter rechts oben in der Detailkarte funktioniert →</div>
+      </div>
+
+      <div class="detail" id="detail"></div>
+
+    </section>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script src="store.js"></script>
+<script src="layout.js"></script>
+<script src="unternehmen.js"></script>
+<script src="forms.js"></script>
+</body>
+</html>

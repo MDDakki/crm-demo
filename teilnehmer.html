@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>future CRM · Teilnehmer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="teilnehmer">
+
+<aside class="side" id="sidebar"></aside>
+
+<div class="main">
+  <header class="topbar">
+    <h1>Teilnehmer<small>alle Teilnehmer in der Betreuung</small></h1>
+    <div class="spacer"></div>
+    <div class="actions">
+      <button class="btn-new">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        Neuer Teilnehmer
+      </button>
+      <button class="icon-btn"><span class="dot"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></button>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- KPI ROW -->
+    <section class="kpis">
+      <div class="kpi b">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div class="num" id="kpi-total">42</div>
+        <div class="lbl">Teilnehmer in Betreuung</div>
+        <div class="trend">+6</div>
+      </div>
+      <div class="kpi g">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg></div>
+        <div class="num" id="kpi-prakt">23</div>
+        <div class="lbl">Im Praktikum</div>
+        <div class="trend">55%</div>
+      </div>
+      <div class="kpi a">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        <div class="num" id="kpi-offen">14</div>
+        <div class="lbl">Praktikum offen</div>
+        <div class="trend">IHK</div>
+      </div>
+      <div class="kpi r">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4M12 17h.01"/></svg></div>
+        <div class="num" id="kpi-rot">5</div>
+        <div class="lbl">Risiko rot</div>
+        <div class="trend">!</div>
+      </div>
+    </section>
+
+    <!-- SPLIT: TABLE + DETAIL -->
+    <section class="split">
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Teilnehmerliste</h2>
+          <span class="count" id="count">42 Teilnehmer</span>
+        </div>
+
+        <div class="toolbar">
+          <div class="search-inline">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input id="search" placeholder="Teilnehmer suchen (Name, Kurs, Betreuer, Unternehmen)…">
+          </div>
+          <div class="filters">
+            <div class="dd" data-group="fach">
+              <button class="chip">
+                <span class="chip-label">Fachrichtung</span>
+                <span class="clear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18M6 6l12 12"/></svg></span>
+                <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="menu" id="menu-fach"></div>
+            </div>
+            <div class="dd" data-group="standort">
+              <button class="chip">
+                <span class="chip-label">Standort</span>
+                <span class="clear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18M6 6l12 12"/></svg></span>
+                <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="menu" id="menu-standort"></div>
+            </div>
+            <div class="dd" data-group="risk">
+              <button class="chip">
+                <span class="chip-label">Risiko</span>
+                <span class="clear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18M6 6l12 12"/></svg></span>
+                <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="menu" id="menu-risk"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Teilnehmer</th>
+                <th>Kurs</th>
+                <th>Fachr.</th>
+                <th>Standort</th>
+                <th>Praktikum</th>
+                <th>Risiko</th>
+                <th>Prio</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+        <div class="hint">Tipp: Zeile anklicken, um Teilnehmer-Details rechts zu öffnen →</div>
+      </div>
+
+      <div class="detail" id="detail"></div>
+
+    </section>
+
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script src="store.js"></script>
+<script src="layout.js"></script>
+<script src="app.js"></script>
+<script src="forms.js"></script>
+</body>
+</html>
