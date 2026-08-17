@@ -7,15 +7,14 @@
    ============================================================ */
 
 // ---- kleine Helfer ----
-const $  = (sel, el=document) => el.querySelector(sel);
-const $$ = (sel, el=document) => [...el.querySelectorAll(sel)];
 
 const fachClass   = { fachi:"fachi", tpd:"tpd", mg:"mg" };
 const lightClass  = { g:"l-g", a:"l-a", r:"l-r" };
 const riskLabel   = { g:"Grün", a:"Gelb", r:"Rot" };
+const prioLabel   = { "1":"Prio 1 · hoch", "2":"Prio 2 · mittel", "3":"Prio 3 · niedrig" };
 
 // Aktiver Filter-Zustand (null = kein Filter)
-const filter = { fach:null, standort:null, risk:null, search:"" };
+const filter = { fach:null, standort:null, prio:null, kurs:null, ihk:null, prakt:null, search:"" };
 let selectedId = null;
 
 const tickSVG  = `<svg class="tick" viewBox="0 0 24 24" fill="none" stroke="#2f6df6" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>`;
@@ -39,12 +38,28 @@ function buildMenus(){
     `<div class="sep"></div>` +
     STANDORTE.map(s => optHTML("standort", s.code, `${s.label} <span class="muted">(${s.code})</span>`)).join("");
 
-  // Risiko
-  $("#menu-risk").innerHTML =
-    optHTML("risk", null, "Alle Risiken") +
+  // Prio
+  $("#menu-prio").innerHTML =
+    optHTML("prio", null, "Alle Prioritäten") +
     `<div class="sep"></div>` +
-    RISIKO.map(r => optHTML("risk", r.code,
-      `<span class="swatch" style="background:${r.swatch}"></span> ${r.label}`)).join("");
+    ["1","2","3"].map(p => optHTML("prio", p,
+      `<span class="prio p${p}">${p}</span> ${prioLabel[p]}`)).join("");
+
+  // Kurs (aus den Teilnehmerdaten)
+  $("#menu-kurs").innerHTML =
+    optHTML("kurs", null, "Alle Kurse") + `<div class="sep"></div>` +
+    [...new Set(TN.map(t => t.kurs))].sort().map(k => optHTML("kurs", k, k)).join("");
+
+  // IHK-Zugehörigkeit (aus den Teilnehmerdaten)
+  $("#menu-ihk").innerHTML =
+    optHTML("ihk", null, "Alle IHKs") + `<div class="sep"></div>` +
+    [...new Set(TN.map(t => t.ihk))].sort().map(k => optHTML("ihk", k, k)).join("");
+
+  // Praktikum-Status
+  $("#menu-prakt").innerHTML =
+    optHTML("prakt", null, "Alle") + `<div class="sep"></div>` +
+    optHTML("prakt", "open", "Nur offene (kein Praktikum)") +
+    optHTML("prakt", "run", "Im Praktikum");
 }
 
 function optHTML(group, value, inner){
@@ -62,9 +77,12 @@ function visibleRows(){
   return TN.filter(t => {
     if (filter.fach     && t.fach      !== filter.fach)     return false;
     if (filter.standort && t.standortK !== filter.standort) return false;
-    if (filter.risk     && t.risk      !== filter.risk)     return false;
+    if (filter.prio     && String(t.prio) !== filter.prio)  return false;
+    if (filter.kurs     && t.kurs      !== filter.kurs)     return false;
+    if (filter.ihk      && t.ihk       !== filter.ihk)      return false;
+    if (filter.prakt    && t.pstatus   !== filter.prakt)    return false;
     if (q){
-      const hay = `${t.vn} ${t.nn} ${t.kurs} ${t.fach} ${t.standort} ${t.betreuer} ${t.pTitle}`.toLowerCase();
+      const hay = `${t.vn} ${t.nn} ${t.kurs} ${t.fach} ${t.standort} ${t.betreuer} ${t.pTitle} ${t.ihk}`.toLowerCase();
       if (!hay.includes(q)) return false;
     }
     return true;
@@ -76,7 +94,7 @@ function renderTable(){
   $("#count").textContent = `${list.length} ${list.length === 1 ? "Treffer" : "Teilnehmer"}`;
 
   if (!list.length){
-    $("#rows").innerHTML = `<tr><td colspan="7"><div class="empty">Keine Teilnehmer für diese Filter. <a href="#" onclick="resetFilters();return false" style="color:var(--blue);font-weight:600">Filter zurücksetzen</a></div></td></tr>`;
+    $("#rows").innerHTML = `<tr><td colspan="8"><div class="empty">Keine Teilnehmer für diese Filter. <a href="#" onclick="resetFilters();return false" style="color:var(--blue);font-weight:600">Filter zurücksetzen</a></div></td></tr>`;
     return;
   }
 
@@ -92,7 +110,8 @@ function renderTable(){
       <td><span class="tag ${fachClass[t.fachKey]}">${t.fach}</span></td>
       <td><span class="muted">${t.standort}</span></td>
       <td><div class="pstatus ${t.pstatus}">${t.pTitle}<small>${t.pSub}</small></div></td>
-      <td><span class="ampel"><span class="light ${lightClass[t.risk]}"></span></span></td>
+      <td><span class="muted">${t.ihk}</span></td>
+      <td><span class="muted">${t.melde}</span></td>
       <td><span class="prio p${t.prio}">${t.prio}</span></td>
     </tr>`).join("");
 
@@ -209,7 +228,7 @@ function clearFilter(group){
 }
 
 function resetFilters(){
-  ["fach","standort","risk"].forEach(g => { filter[g] = null; updateChip(g); markSelectedOptions(g); });
+  ["fach","standort","prio","kurs","ihk","prakt"].forEach(g => { filter[g] = null; updateChip(g); markSelectedOptions(g); });
   filter.search = "";
   $("#search").value = "";
   renderTable();
@@ -222,7 +241,7 @@ function updateChip(group){
   const labelEl = $(".chip-label", chip);
   const val  = filter[group];
 
-  const defaults = { fach:"Fachrichtung", standort:"Standort", risk:"Risiko" };
+  const defaults = { fach:"Fachrichtung", standort:"Standort", prio:"Prio", kurs:"Kurs", ihk:"IHK", prakt:"Praktikum" };
   if (!val){
     labelEl.textContent = defaults[group];
     chip.classList.remove("active");
@@ -235,7 +254,8 @@ function updateChip(group){
 function chipText(group, val){
   if (group === "fach")     return val;
   if (group === "standort") return (STANDORTE.find(s => s.code === val) || {}).label || val;
-  if (group === "risk")     return riskLabel[val];
+  if (group === "prio")     return prioLabel[val];
+  if (group === "prakt")    return val === "open" ? "Nur offene" : "Im Praktikum";
   return val;
 }
 
@@ -262,7 +282,7 @@ function renderKpis(){
 function init(){
   buildMenus();
   setupDropdowns();
-  ["fach","standort","risk"].forEach(markSelectedOptions);
+  ["fach","standort","prio","kurs","ihk","prakt"].forEach(markSelectedOptions);
   renderKpis();
   renderTable();
   if (TN[0]) selectTN(TN[0].id);

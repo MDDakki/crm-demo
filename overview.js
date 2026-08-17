@@ -3,7 +3,6 @@
    Die vollen Listen liegen auf teilnehmer.html / unternehmen.html.
    ============================================================ */
 
-const $ = (s, e=document) => e.querySelector(s);
 
 const lightClass  = { g:"l-g", a:"l-a", r:"l-r" };
 const fachKeyByCode = {};

@@ -3,6 +3,25 @@
    Aktive Seite wird über  <body data-page="...">  gesteuert.
    ============================================================ */
 
+/* ---- gemeinsame Helfer (layout.js lädt vor jedem Seitenskript) ---- */
+const $  = (s, e=document) => e.querySelector(s);
+const $$ = (s, e=document) => [...e.querySelectorAll(s)];
+
+// Pfad-Helfer für "a.b.c"-Bindungen (nur firma/akte)
+const getP = (o, p) => p.split(".").reduce((a, k) => (a == null ? a : a[k]), o);
+const setP = (o, p, v) => {
+  const ks = p.split("."); const last = ks.pop();
+  let t = o; ks.forEach(k => t = (t[k] = t[k] ?? {}));
+  t[last] = v;
+};
+
+// Karten-Baustein
+function card(title, icon, body){
+  return `<div class="card">
+    <div class="card-head"><span class="ci">${icon}</span><h2>${title}</h2></div>
+    <div class="card-body">${body}</div></div>`;
+} 
+
 const NAV = [
   { group:"Arbeitsbereich" },
   { key:"uebersicht",  label:"Übersicht",          href:"index.html",
@@ -12,7 +31,7 @@ const NAV = [
   { key:"unternehmen", label:"Unternehmen", href:"unternehmen.html",
     icon:`<path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-3"/>` },
   { key:"matching",    label:"Matching &amp; Umkreis", href:"#",
-    icon:`<path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/>` },
+    icon:`<path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0Z"/ ><circle cx="12" cy="10" r="3"/>` },
   { group:"Organisation" },
   { key:"aufgaben",    label:"Aufgaben", href:"#", badge:"5",
     icon:`<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>` },
@@ -41,7 +60,7 @@ function renderSidebar(){
   document.getElementById("sidebar").innerHTML = `
     <div class="brand">
       <div class="mark">f</div>
-      <div><b>future&nbsp;CRM</b><span>Team Praktikum</span></div>
+      <div><b>future&nbsp;CRM</b><span> Team Praktikum</span></div>
     </div>
     <nav class="nav">${items}</nav>
     <button class="side-reset" onclick="resetDemo()" title="Selbst eingegebene Demo-Daten löschen">

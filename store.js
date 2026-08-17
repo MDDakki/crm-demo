@@ -42,6 +42,16 @@ window.UNTERNEHMEN = load(STORE_KEYS.un, SEED_UNTERNEHMEN);
 window.USERS       = load(STORE_KEYS.users, SEED_USERS);
 window.ACTIVITY    = load(STORE_KEYS.activity, SEED_ACTIVITY);
 
+// "Angelegt am" für Beispiel-Firmen + alte Daten nachrüsten
+const _seedCreated = {1:"12.03.2024, 09:15",2:"03.07.2024, 11:40",3:"21.11.2024, 14:05",4:"08.01.2025, 10:30",5:"19.02.2025, 16:20",6:"27.05.2026, 08:50"};
+UNTERNEHMEN.forEach(u => { if (!u.createdAt) u.createdAt = _seedCreated[u.id] || "—"; });
+
+// aktuelles Datum + Uhrzeit als "TT.MM.JJJJ, HH:MM"
+function fmtNow(){
+  const d = new Date(), p = n => String(n).padStart(2, "0");
+  return `${p(d.getDate())}.${p(d.getMonth()+1)}.${d.getFullYear()}, ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
 function saveTN(){ localStorage.setItem(STORE_KEYS.tn, JSON.stringify(TN)); }
 function saveUN(){ localStorage.setItem(STORE_KEYS.un, JSON.stringify(UNTERNEHMEN)); }
 function saveUsers(){ localStorage.setItem(STORE_KEYS.users, JSON.stringify(USERS)); }
@@ -58,7 +68,7 @@ function logActivity(text, user){
 }
 
 function addTN(obj){ obj.id = nextId(TN); TN.unshift(obj); saveTN(); logActivity(`hat den Teilnehmer <b>${obj.vn} ${obj.nn}</b> hinzugefügt`); return obj.id; }
-function addUN(obj){ obj.id = nextId(UNTERNEHMEN); UNTERNEHMEN.unshift(obj); saveUN(); logActivity(`hat das Unternehmen <b>${obj.name}</b> hinzugefügt`); return obj.id; }
+function addUN(obj){ obj.id = nextId(UNTERNEHMEN); obj.createdAt = fmtNow(); UNTERNEHMEN.unshift(obj); saveUN(); logActivity(`hat das Unternehmen <b>${obj.name}</b> hinzugefügt`); return obj.id; }
 function addUser(obj){ obj.id = nextId(USERS); USERS.unshift(obj); saveUsers(); logActivity(`hat den Benutzer <b>${obj.name}</b> angelegt`); return obj.id; }
 
 function resetDemo(){
@@ -72,3 +82,4 @@ function resetDemo(){
 
 // global verfügbar machen
 Object.assign(window, { saveTN, saveUN, saveUsers, saveActivity, logActivity, addTN, addUN, addUser, resetDemo });
+  

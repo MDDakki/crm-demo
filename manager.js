@@ -4,8 +4,6 @@
    - speichert über store.js (localStorage)
    ============================================================ */
 
-const $  = (s, e=document) => e.querySelector(s);
-const $$ = (s, e=document) => [...e.querySelectorAll(s)];
 
 const ROLES = ["Admin","Bearbeiter","Leser"];
 const TEAMS = ["Leitung","Koordination","NLL","Verwaltung","Zusätzlich"];

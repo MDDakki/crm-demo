@@ -4,8 +4,6 @@
    - funktionierender Aktiv-Schalter (Toggle)
    ============================================================ */
 
-const $  = (sel, el=document) => el.querySelector(sel);
-const $$ = (sel, el=document) => [...el.querySelectorAll(sel)];
 
 const fachKeyByCode = {};
 FACHRICHTUNGEN.forEach(f => { fachKeyByCode[f.code] = f.key; });
@@ -13,7 +11,11 @@ FACHRICHTUNGEN.forEach(f => { fachKeyByCode[f.code] = f.key; });
 // eindeutige Orte aus den Daten
 const ORTE = [...new Set(UNTERNEHMEN.map(u => u.ort))].sort();
 
-const filter = { fach:null, ort:null, status:null, aktiv:null, search:"" };
+// Anlage-Jahr aus "TT.MM.JJJJ, HH:MM" ziehen + eindeutige Jahre (neueste zuerst)
+const yearOf = u => (u.createdAt || "").split(",")[0].split(".").pop().trim();
+const JAHRE = [...new Set(UNTERNEHMEN.map(yearOf).filter(Boolean))].sort((a, b) => b - a);
+
+const filter = { fach:null, ort:null, status:null, aktiv:null, jahr:null, search:"" };
 let selectedId = null;
 
 const tickSVG  = `<svg class="tick" viewBox="0 0 24 24" fill="none" stroke="#2f6df6" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>`;
@@ -50,6 +52,10 @@ function buildMenus(){
     opt("aktiv", null, "Alle") + `<div class="sep"></div>` +
     opt("aktiv", "1", `<span class="swatch" style="background:var(--green)"></span> Aktiv`) +
     opt("aktiv", "0", `<span class="swatch" style="background:var(--ink-faint)"></span> Inaktiv`);
+
+  $("#menu-jahr").innerHTML =
+    opt("jahr", null, "Alle Jahre") + `<div class="sep"></div>` +
+    JAHRE.map(j => opt("jahr", j, j)).join("");
 }
 
 /* ----------------------------------------------------------
@@ -64,6 +70,7 @@ function visibleRows(){
     if (filter.status === "belegt" &&  hasFreiPlatz(u))               return false;
     if (filter.aktiv  === "1" && !u.aktiv)                            return false;
     if (filter.aktiv  === "0" &&  u.aktiv)                            return false;
+    if (filter.jahr   && yearOf(u) !== filter.jahr)                   return false;
     if (q){
       const hay = `${u.name} ${u.ort} ${u.plz} ${u.fach.join(" ")} ${u.ansprech.map(a=>a.vn+" "+a.nn).join(" ")}`.toLowerCase();
       if (!hay.includes(q)) return false;
@@ -77,7 +84,7 @@ function renderTable(){
   $("#count").textContent = `${list.length} ${list.length === 1 ? "Treffer" : "Unternehmen"}`;
 
   if (!list.length){
-    $("#rows").innerHTML = `<tr><td colspan="6"><div class="empty">Keine Unternehmen für diese Filter. <a href="#" onclick="resetFilters();return false" style="color:var(--blue);font-weight:600">Filter zurücksetzen</a></div></td></tr>`;
+    $("#rows").innerHTML = `<tr><td colspan="7"><div class="empty">Keine Unternehmen für diese Filter. <a href="#" onclick="resetFilters();return false" style="color:var(--blue);font-weight:600">Filter zurücksetzen</a></div></td></tr>`;
     return;
   }
 
@@ -99,11 +106,12 @@ function renderTable(){
         : `<span class="pill nokoop">offen</span>`}</td>
       <td>
         <div class="platzcell">
-          ${frei ? `<span class="frei">${freiN} Platz frei</span>` : `<span class="belegt">voll belegt</span>`}
-          <small>${u.plaetze.length} Plätze gesamt</small>
+          ${frei ? `<span class="frei">${freiN} ${freiN===1?'Platz':'Plätze'} frei</span>` : `<span class="belegt">voll belegt</span>`}
+          <small>${u.plaetze.length} ${u.plaetze.length===1?'Platz':'Plätze'} gesamt</small>
         </div>
       </td>
       <td><span class="dotstate ${u.aktiv?'on':'off'}"><span class="d"></span>${u.aktiv?'Aktiv':'Inaktiv'}</span></td>
+      <td><span class="muted" style="white-space:nowrap">${(u.createdAt||'—').split(',')[0]}</span></td>
     </tr>`;
   }).join("");
 
@@ -120,6 +128,7 @@ const ic = {
   mail:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>`,
   doc:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>`,
   branch:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-3"/></svg>`,
+  clock:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>`,
 };
 
 function selectU(id){
@@ -178,6 +187,7 @@ function selectU(id){
       <div class="drow">${ic.phone}<span class="k">Telefon</span><span class="v">${u.tel}</span></div>
       <div class="drow">${ic.mail}<span class="k">E-Mail</span><span class="v">${u.email}</span></div>
       <div class="drow">${ic.doc}<span class="k">Kooperationsvertrag</span><span class="v">${u.koop?`Ja · seit ${u.koopSeit}`:'offen'}</span></div>
+      <div class="drow">${ic.clock}<span class="k">Angelegt am</span><span class="v">${u.createdAt||'—'}</span></div>
     </div>
 
     <div class="section">
@@ -238,7 +248,7 @@ function renderKpis(){
 /* ----------------------------------------------------------
    Dropdown-Interaktion (wie auf der Übersicht)
    ---------------------------------------------------------- */
-const chipDefaults = { fach:"Fachrichtung", ort:"Ort", status:"Plätze", aktiv:"Status" };
+const chipDefaults = { fach:"Fachrichtung", ort:"Ort", status:"Plätze", aktiv:"Status", jahr:"Jahr" };
 
 function setupDropdowns(){
   $$(".dd").forEach(dd => {
@@ -263,7 +273,7 @@ function setupDropdowns(){
 function closeAllMenus(){ $$(".dd").forEach(d => d.classList.remove("open")); }
 function clearFilter(g){ filter[g]=null; updateChip(g); markSel(g); closeAllMenus(); renderTable(); }
 function resetFilters(){
-  ["fach","ort","status","aktiv"].forEach(g => { filter[g]=null; updateChip(g); markSel(g); });
+  ["fach","ort","status","aktiv","jahr"].forEach(g => { filter[g]=null; updateChip(g); markSel(g); });
   filter.search=""; $("#search").value=""; renderTable();
 }
 function chipText(g,v){
@@ -286,7 +296,7 @@ function markSel(g){
 function init(){
   buildMenus();
   setupDropdowns();
-  ["fach","ort","status","aktiv"].forEach(markSel);
+  ["fach","ort","status","aktiv","jahr"].forEach(markSel);
   renderKpis();
   renderTable();
   if (UNTERNEHMEN[0]) selectU(UNTERNEHMEN[0].id);

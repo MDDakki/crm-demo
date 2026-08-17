@@ -4,8 +4,6 @@
    Alles editierbar, speichert über store.js (localStorage).
    ============================================================ */
 
-const $  = (s, e=document) => e.querySelector(s);
-const $$ = (s, e=document) => [...e.querySelectorAll(s)];
 
 const lightClass = { g:"l-g", a:"l-a", r:"l-r" };
 const riskLabel  = { g:"Grün: alles offen", a:"Gelb: 1 Risiko", r:"Rot: mehrere Risiken" };
@@ -29,16 +27,17 @@ const HAKEN = [
   { key:"BN", label:"Bewerbungsnachweise" },
 ];
 
-const OUTCOMES = ["Termin","Bewerbungsunterlagen überarbeitet","Bewerbungsunterlagen Feedback",
-  "Bewerbungscoaching","Interviewcoaching","Proaktive Fortschrittskontrolle"];
-
-/* ---- Pfad-Helfer für data-bind ---- */
-const getP = (o, p) => p.split(".").reduce((a, k) => (a == null ? a : a[k]), o);
-const setP = (o, p, v) => {
-  const ks = p.split("."); const last = ks.pop();
-  let t = o; ks.forEach(k => t = (t[k] = t[k] ?? {}));
-  t[last] = v;
-};
+const OUTCOMES = [
+  "Situationsanalyse/ Angebot & Prozess TP",
+  "Bewerbungsstrategie",
+  "BWU - Lebenslauf",
+  "BWU - Anschreiben",
+  "Gesprächstraining",
+  "Vorstellungsgespräch - Vor-/Nachbereitung",
+  "Fortschrittskontrolle",
+  "Info zum TN",
+  "Sonstiges",
+];
 
 /* ---- fehlende Felder mit sinnvollen Defaults füllen ---- */
 function withDefaults(t){
@@ -126,7 +125,7 @@ function hero(){
       <div class="av">${T.init}</div>
       <div>
         <h1>${T.vn} ${T.nn}</h1>
-        <div class="sub"><span>${T.kurs}</span><span class="dot"></span><span>Fachrichtung ${T.fach}</span><span class="dot"></span><span>${T.standort}</span></div>
+        <div class="sub"><span>${T.kurs}</span><span class="dot"></span><span>Fachrichtung ${T.fach}</span><span class="dot"></span><span>${T.standort}</span><span class="dot"></span><span>Betreuer: ${T.betreuer}</span></div>
       </div>
       <div class="hero-right">
         <div class="hero-prio">Prio <b class="p${T.prio}" id="hero-prio">${T.prio}</b></div>
@@ -201,31 +200,33 @@ function haken(key, label, on, isPv){
 
 /* ---- Erinnerung / nächster Schritt ---- */
 function erinnerung(){
+  // ponytail: OUTCOMES ist die Dropdown-Quelle (max. 10). Endgültige Liste kommt vom Kunden, dann OUTCOMES ersetzen.
   return card("Erinnerung · nächster Schritt", iconBell, `
+    <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px">Kontakt protokollieren</div>
+    <div class="frow"><label>Art</label>
+      <select class="fin" id="rem-outcome">
+        <option value="">Art wählen…</option>
+        ${OUTCOMES.slice(0,10).map(o => `<option>${o}</option>`).join("")}
+      </select>
+    </div>
+    <div class="frow"><label>Kommentar</label>
+      <textarea class="fin full" id="rem-kom" rows="3" maxlength="300" placeholder="Was ist passiert?"></textarea>
+    </div>
+    <div style="text-align:right;font-size:11px;color:var(--ink-faint);margin:-4px 0 10px"><span id="rem-count">0</span>/300</div>
+    <div class="sep" style="height:1px;background:var(--line);margin:2px 0 12px"></div>
+    <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px">Neue Erinnerung <span style="color:var(--red)">*</span></div>
     ${frow("Nächster Schritt", `<input class="fin" data-bind="reminder.text" value="${T.reminder.text||''}" placeholder="z. B. Praktikumsbesuch nach 4 Wochen">`)}
     ${frow("Betreuer", `<input class="fin" data-bind="reminder.betreuer" value="${T.reminder.betreuer||''}">`)}
     ${frow("Fällig am", `<input class="fin" data-bind="reminder.datum" value="${T.reminder.datum||''}" placeholder="TT.MM.JJJJ">`)}
-    <div class="frow"><label>Erledigt</label>
-      <label class="inline-chk"><input type="checkbox" id="rem-done" ${T.reminder.done?'checked':''}> abgeschlossen</label>
-    </div>`);
+    <button class="btn pri" id="rem-done-btn" style="width:100%;margin-top:12px">Erledigt &amp; protokollieren</button>`);
 }
 
 /* ---- Kontakthistorie ---- */
 const HIST_LIMIT = 3; // wie viele Einträge zuerst angezeigt werden
 
 function historie(){
-  // Art-Vorschläge = Standard-Liste + bereits verwendete Arten
-  const used = [...new Set(T.history.map(h => h.outcome).filter(Boolean))];
-  const opts = [...new Set([...OUTCOMES, ...used])];
-  return card("Kontakthistorie", iconClock, `
-    <div id="hist-list"></div>
-    <div class="hist-add">
-      <input id="h-datum" placeholder="TT.MM.JJJJ">
-      <input id="h-outcome" list="outcome-list" placeholder="Art (wählen oder neu eingeben)…">
-      <datalist id="outcome-list">${opts.map(o => `<option value="${o}"></option>`).join("")}</datalist>
-      <textarea id="h-kom" class="full" rows="3" placeholder="Kommentar, beliebig lang…"></textarea>
-      <button class="btn pri" id="h-add">+ Eintrag hinzufügen</button>
-    </div>`);
+  // Einträge entstehen automatisch beim Abschließen einer Erinnerung (siehe erinnerung()).
+  return card("Kontakthistorie", iconClock, `<div id="hist-list"></div>`);
 }
 
 // Einträge anzeigen (nur die neuesten, ältere per „mehr zeigen")
@@ -269,11 +270,6 @@ function links(){
 }
 
 /* ---- kleine Bausteine ---- */
-function card(title, icon, body){
-  return `<div class="card">
-    <div class="card-head"><span class="ci">${icon}</span><h2>${title}</h2></div>
-    <div class="card-body">${body}</div></div>`;
-}
 function frow(label, inner){ return `<div class="frow"><label>${label}</label>${inner}</div>`; }
 
 /* ============================================================
@@ -326,25 +322,35 @@ function wire(){
     });
   });
 
-  // Erinnerung erledigt
-  const rd = $("#rem-done");
-  if (rd) rd.addEventListener("change", () => { T.reminder.done = rd.checked; persist(); });
-
   // Kontakthistorie anzeigen
   fillHistList();
 
-  // Historie hinzufügen
-  const add = $("#h-add");
-  if (add) add.addEventListener("click", () => {
-    const datum = $("#h-datum").value.trim();
-    const outcome = $("#h-outcome").value.trim() || "Notiz";
-    const kommentar = $("#h-kom").value.trim();
-    if (!datum && !kommentar){ alert("Bitte Datum oder Kommentar eingeben."); return; }
-    T.history.unshift({ datum, outcome, kommentar });
+  // Zeichenzähler für den Kommentar (max. 300)
+  const remKom = $("#rem-kom"), remCount = $("#rem-count");
+  if (remKom && remCount){
+    const upd = () => remCount.textContent = remKom.value.length;
+    remKom.addEventListener("input", upd); upd();
+  }
+
+  // Erinnerung abschließen: aktuellen Kontakt protokollieren + neue Erinnerung erzwingen
+  const remBtn = $("#rem-done-btn");
+  if (remBtn) remBtn.addEventListener("click", () => {
+    const outcome = $("#rem-outcome").value.trim();
+    const kommentar = $("#rem-kom").value.trim();
+    if (!outcome){ alert("Bitte eine Art wählen."); return; }
+    // Guard: nur abschließbar, wenn eine neue Erinnerung gesetzt ist
+    if (!(T.reminder.text||"").trim() || !(T.reminder.datum||"").trim()){
+      alert("Bitte zuerst eine neue Erinnerung setzen (Nächster Schritt + Fällig am), bevor du abschließt.");
+      return;
+    }
+    const p = n => String(n).padStart(2, "0"), d = new Date();
+    const heute = `${p(d.getDate())}.${p(d.getMonth()+1)}.${d.getFullYear()}`;
+    T.history.unshift({ datum: heute, outcome, kommentar });
+    T.reminder.done = false; // die neu gesetzte Erinnerung ist wieder offen
     persist();
-    logActivity(`hat einen Kontakt bei <b>${T.vn} ${T.nn}</b> vermerkt`);
-    $("#h-datum").value = ""; $("#h-outcome").value = ""; $("#h-kom").value = "";
-    fillHistList();   // nur die Liste aktualisieren – Eingaben bleiben sonst erhalten
+    logActivity(`hat einen Kontakt bei <b>${T.vn} ${T.nn}</b> protokolliert`);
+    $("#rem-outcome").value = ""; $("#rem-kom").value = ""; if (remCount) remCount.textContent = "0";
+    fillHistList();
   });
 }
 

@@ -4,26 +4,15 @@
    Alles editierbar, speichert über store.js (localStorage).
    ============================================================ */
 
-const $  = (s, e=document) => e.querySelector(s);
-const $$ = (s, e=document) => [...e.querySelectorAll(s)];
-
 const fachKeyByCode = {};
 FACHRICHTUNGEN.forEach(f => { fachKeyByCode[f.code] = f.key; });
 
-const UN_OUTCOMES = ["Interesse","Kein Interesse","Noch kein Ausbildungsbetrieb",
-  "Rückruf in 6 Mon.","Rückruf in 12 Mon.","Rückruf in 24 Mon."];
-
-/* ---- Pfad-Helfer ---- */
-const getP = (o, p) => p.split(".").reduce((a, k) => (a == null ? a : a[k]), o);
-const setP = (o, p, v) => {
-  const ks = p.split("."); const last = ks.pop();
-  let t = o; ks.forEach(k => t = (t[k] = t[k] ?? {}));
-  t[last] = v;
-};
+const UN_OUTCOMES = ["Interesse", "Kein Interesse", "Noch kein Ausbildungsbetrieb",
+  "Rückruf in 6 Mon.", "Rückruf in 12 Mon.", "Rückruf in 24 Mon."];
 
 /* ---- speichern + Hinweis + Aktivität (entprellt) ---- */
 let hintTimer, actTimer;
-function persist(){
+function persist() {
   saveUN();
   const h = $("#saved");
   h.classList.add("show");
@@ -31,20 +20,19 @@ function persist(){
   hintTimer = setTimeout(() => h.classList.remove("show"), 1100);
   clearTimeout(actTimer);
   actTimer = setTimeout(() => logActivity(`hat das Unternehmen <b>${U.name}</b> aktualisiert`), 1500);
-}
+} 
 
 let U; // aktuelles Unternehmen
-
-function init(){
+function init() {
   const id = +new URLSearchParams(location.search).get("id") || (UNTERNEHMEN[0] && UNTERNEHMEN[0].id);
   U = UNTERNEHMEN.find(u => u.id === id);
-  if (!U){ $("#firma").innerHTML = `<div class="empty">Unternehmen nicht gefunden.</div>`; return; }
+  if (!U) { $("#firma").innerHTML = `<div class="empty">Unternehmen nicht gefunden.</div>`; return; }
   // sicherstellen, dass Listen existieren
   U.filialen = U.filialen || [];
   U.ansprech = U.ansprech || [];
-  U.plaetze  = U.plaetze  || [];
-  U.fach     = U.fach     || [];
-  if (!U.notizen) U.notizen = [{ datum:"05.06.2026", text:"Langjährige Kooperation, stellt zuverlässig Praktikumsplätze bereit." }];
+  U.plaetze = U.plaetze || [];
+  U.fach = U.fach || [];
+  if (!U.notizen) U.notizen = [{ datum: "05.06.2026", text: "Langjährige Kooperation, stellt zuverlässig Praktikumsplätze bereit." }];
   document.title = `future CRM · ${U.name}`;
   render();
 }
@@ -52,7 +40,8 @@ function init(){
 /* ============================================================
    Render
    ============================================================ */
-function render(){
+
+function render() {
   const freiN = U.plaetze.filter(p => p.belegtBis === null || p.belegtBis === "").length;
   $("#firma").innerHTML = hero(freiN) + `
     <div class="akte-grid">
@@ -62,7 +51,7 @@ function render(){
   wire();
 }
 
-function hero(freiN){
+function hero(freiN) {
   return `
     <div class="akte-hero">
       <div class="av">${U.init}</div>
@@ -72,8 +61,8 @@ function hero(freiN){
       </div>
       <div class="hero-right">
         <div class="hero-prio" style="gap:10px">${U.koop
-          ? `<span class="pill koop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>Kooperationsvertrag</span>`
-          : `<span class="pill nokoop">kein Vertrag</span>`}</div>
+      ? `<span class="pill koop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>Kooperationsvertrag</span>`
+      : `<span class="pill nokoop">kein Vertrag</span>`}</div>
         <div class="hero-amp" style="background:rgba(255,255,255,.12)">
           ${freiN ? `${freiN} Platz frei` : "voll belegt"}
         </div>
@@ -85,32 +74,34 @@ function hero(freiN){
 }
 
 /* ---- Stammdaten ---- */
-function fld(label, bind, opt={}){
+function fld(label, bind, opt = {}) {
   return `<div class="frow"><label>${label}</label>
-    <input class="fin" data-bind="${bind}" value="${getP(U,bind) ?? ''}" placeholder="${opt.ph||''}"></div>`;
+    <input class="fin" data-bind="${bind}" value="${getP(U, bind) ?? ''}" placeholder="${opt.ph || ''}"></div>`;
 }
-function stammdaten(){
+function stammdaten() {
   return card("Stammdaten", iconBuilding, `
-    ${fld("Unternehmensname","name")}
-    ${fld("Straße & Hausnr.","str")}
-    ${fld("PLZ","plz")}
-    ${fld("Ort","ort")}
-    ${fld("Telefon","tel")}
-    ${fld("E-Mail","email")}
+    ${fld("Unternehmensname", "name")}
+    ${fld("Straße & Hausnr.", "str")}
+    ${fld("PLZ", "plz")}
+    ${fld("Ort", "ort")}
+    ${fld("Telefon", "tel")}
+    ${fld("E-Mail", "email")}
     <div class="frow"><label>Kooperationsvertrag</label>
-      <label class="inline-chk"><input type="checkbox" id="koop-cb" ${U.koop?'checked':''}> vorhanden</label>
+      <label class="inline-chk"><input type="checkbox" id="koop-cb" ${U.koop ? 'checked' : ''}> vorhanden</label>
     </div>
-    ${fld("seit (Jahr)","koopSeit")}
+    ${fld("seit (Jahr)", "koopSeit")}
+    <div class="frow"><label>Angelegt am</label>
+      <input class="fin ro" value="${U.createdAt || '—'}" readonly></div>
   `);
 }
 
 /* ---- Fachrichtungen (mehrere) ---- */
-function fachCard(){
+function fachCard() {
   return card("Fachrichtungen", iconTag, `
     <div class="hint-line">Mehrfachauswahl, anklicken zum An-/Abwählen</div>
     ${fachChips(U.fach, "fach")}`);
 }
-function fachChips(selected, path){
+function fachChips(selected, path) {
   return `<div class="fach-pick">${FACHRICHTUNGEN.map(f => `
     <span class="fp ${selected.includes(f.code) ? "on" : ""}" data-fach="${path}" data-code="${f.code}">
       <span class="tag ${f.key}">${f.code}</span>
@@ -118,18 +109,18 @@ function fachChips(selected, path){
 }
 
 /* ---- Praktikumsplätze ---- */
-function plaetzeCard(){
+function plaetzeCard() {
   const rows = U.plaetze.map((p, i) => {
     const frei = !p.belegtBis;
     return `
     <div class="platz-edit">
       <select class="fin" data-bind="plaetze.${i}.fach">
-        ${(U.fach.length ? U.fach : [p.fach]).map(c => `<option value="${c}" ${c===p.fach?'selected':''}>${c}</option>`).join("")}
+        ${(U.fach.length ? U.fach : [p.fach]).map(c => `<option value="${c}" ${c === p.fach ? 'selected' : ''}>${c}</option>`).join("")}
       </select>
-      <input class="fin" data-bind="plaetze.${i}.belegtBis" value="${p.belegtBis||''}" placeholder="frei lassen = verfügbar">
-      <input class="fin" data-bind="plaetze.${i}.tn" value="${p.tn||''}" placeholder="Teilnehmer (falls belegt)">
+      <input class="fin" data-bind="plaetze.${i}.belegtBis" value="${p.belegtBis || ''}" placeholder="frei lassen = verfügbar">
+      <input class="fin" data-bind="plaetze.${i}.tn" value="${p.tn || ''}" placeholder="Teilnehmer (falls belegt)">
       <button class="row-del" data-del="plaetze" data-i="${i}" title="Platz entfernen">${iconTrash}</button>
-      <div class="platz-state ${frei?'frei':'belegt'}">${frei ? "Platz frei" : "belegt"}</div>
+      <div class="platz-state ${frei ? 'frei' : 'belegt'}">${frei ? "Platz frei" : "belegt"}</div>
     </div>`;
   }).join("");
   return card("Praktikumsplätze", iconCheck, `
@@ -138,11 +129,11 @@ function plaetzeCard(){
 }
 
 /* ---- Filialen ---- */
-function filialenCard(){
+function filialenCard() {
   const rows = U.filialen.map((f, i) => `
     <div class="listcard">
       <div class="branch-edit">
-        <input class="fin" data-bind="filialen.${i}.ort" value="${f.ort||''}" placeholder="Ort / Standort">
+        <input class="fin" data-bind="filialen.${i}.ort" value="${f.ort || ''}" placeholder="Ort / Standort">
         <button class="row-del" data-del="filialen" data-i="${i}" title="Filiale entfernen">${iconTrash}</button>
       </div>
       ${fachChips(f.fach || [], `filialen.${i}.fach`)}
@@ -153,31 +144,31 @@ function filialenCard(){
 }
 
 /* ---- Ansprechpartner ---- */
-function ansprechCard(){
+function ansprechCard() {
   const cards = U.ansprech.map((a, i) => `
-    <div class="listcard contact ${a.aktiv?'':'dim'}">
+    <div class="listcard contact ${a.aktiv ? '' : 'dim'}">  
       <div class="ap-grid">
-        <input class="fin" data-bind="ansprech.${i}.vn" value="${a.vn||''}" placeholder="Vorname">
-        <input class="fin" data-bind="ansprech.${i}.nn" value="${a.nn||''}" placeholder="Name">
-        <input class="fin full" data-bind="ansprech.${i}.job" value="${a.job||''}" placeholder="Jobtitel">
-        <input class="fin" data-bind="ansprech.${i}.email" value="${a.email||''}" placeholder="E-Mail">
-        <input class="fin" data-bind="ansprech.${i}.tel" value="${a.tel||''}" placeholder="Telefon / Durchwahl">
-        <input class="fin full" data-bind="ansprech.${i}.outcome" list="ap-outcomes" value="${a.outcome||''}" placeholder="Outcome (wählen oder neu)…">
+        <input class="fin" data-bind="ansprech.${i}.vn" value="${a.vn || ''}" placeholder="Vorname">
+        <input class="fin" data-bind="ansprech.${i}.nn" value="${a.nn || ''}" placeholder="Name">
+        <input class="fin full" data-bind="ansprech.${i}.job" value="${a.job || ''}" placeholder="Jobtitel">
+        <input class="fin" data-bind="ansprech.${i}.email" value="${a.email || ''}" placeholder="E-Mail">
+        <input class="fin" data-bind="ansprech.${i}.tel" value="${a.tel || ''}" placeholder="Telefon / Durchwahl">
+        <input class="fin full" data-bind="ansprech.${i}.outcome" list="ap-outcomes" value="${a.outcome || ''}" placeholder="Outcome (wählen oder neu)…">
       </div>
       ${fachChips(a.fach || [], `ansprech.${i}.fach`)}
       <div class="ap-foot">
-        <div class="toggle small ${a.aktiv?'on':''}" data-aptoggle="${i}"><span class="track"></span>${a.aktiv?'aktiv':'inaktiv'}</div>
+        <div class="toggle small ${a.aktiv ? 'on' : ''}" data-aptoggle="${i}"><span class="track"></span>${a.aktiv ? 'aktiv' : 'inaktiv'}</div>
         <button class="row-del" data-del="ansprech" data-i="${i}" title="Ansprechpartner entfernen">${iconTrash}</button>
       </div>
     </div>`).join("");
   return card("Ansprechpartner", iconUser, `
-    <datalist id="ap-outcomes">${UN_OUTCOMES.map(o=>`<option value="${o}"></option>`).join("")}</datalist>
+    <datalist id="ap-outcomes">${UN_OUTCOMES.map(o => `<option value="${o}"></option>`).join("")}</datalist>
     ${cards || `<div class="empty" style="padding:10px">Noch keine Ansprechpartner.</div>`}
     <button class="add-row" data-add="ansprech">+ Ansprechpartner hinzufügen</button>`);
 }
 
 /* ---- Notizen ---- */
-function notizenCard(){
+function notizenCard() {
   const items = U.notizen.length
     ? `<div class="hist">${U.notizen.map(n => `
         <div class="hist-item">
@@ -195,7 +186,7 @@ function notizenCard(){
 }
 
 /* ---- Verknüpfte Teilnehmer (aus Plätzen abgeleitet) ---- */
-function tnCard(){
+function tnCard() {
   const names = [...new Set(U.plaetze.map(p => p.tn).filter(Boolean))];
   const inner = names.length
     ? `<div class="mtags">${names.map(n => `<span class="outcome" style="background:var(--blue-soft);color:var(--blue)">${n}</span>`).join(" ")}</div>`
@@ -203,17 +194,10 @@ function tnCard(){
   return card("Verknüpfte Teilnehmer", iconLink, inner);
 }
 
-/* ---- Baustein ---- */
-function card(title, icon, body){
-  return `<div class="card">
-    <div class="card-head"><span class="ci">${icon}</span><h2>${title}</h2></div>
-    <div class="card-body">${body}</div></div>`;
-}
-
 /* ============================================================
    Interaktion
    ============================================================ */
-function wire(){
+function wire() {
   // Textfelder / Selects
   $$("[data-bind]").forEach(el => {
     const ev = el.tagName === "SELECT" ? "change" : "input";
@@ -264,8 +248,8 @@ function wire(){
   const nadd = $("#n-add");
   if (nadd) nadd.addEventListener("click", () => {
     const datum = $("#n-datum").value.trim();
-    const text  = $("#n-text").value.trim();
-    if (!text){ alert("Bitte eine Notiz eingeben."); return; }
+    const text = $("#n-text").value.trim();
+    if (!text) { alert("Bitte eine Notiz eingeben."); return; }
     U.notizen.unshift({ datum, text });
     persist();
     logActivity(`hat eine Notiz bei <b>${U.name}</b> hinzugefügt`);
@@ -274,24 +258,24 @@ function wire(){
 
   // Hinzufügen
   $$("[data-add]").forEach(b => b.addEventListener("click", () => {
-    if (b.dataset.add === "platz")    U.plaetze.push({ fach: U.fach[0] || "", belegtBis: null, tn: null });
-    if (b.dataset.add === "filiale")  U.filialen.push({ ort: "", fach: [] });
-    if (b.dataset.add === "ansprech") U.ansprech.unshift({ vn:"", nn:"", job:"", email:"", tel:"", aktiv:true, fach:[], outcome:"Interesse" });
+    if (b.dataset.add === "platz") U.plaetze.push({ fach: U.fach[0] || "", belegtBis: null, tn: null });
+    if (b.dataset.add === "filiale") U.filialen.push({ ort: "", fach: [] });
+    if (b.dataset.add === "ansprech") U.ansprech.unshift({ vn: "", nn: "", job: "", email: "", tel: "", aktiv: true, fach: [], outcome: "Interesse" });
     persist(); render();
   }));
 }
 
 // nur Plätze-Statusanzeige aktualisieren ohne Fokusverlust bei Texteingabe
-function renderSoft(){ /* einfacher: voll neu rendern */ render(); }
+function renderSoft() { /* einfacher: voll neu rendern */ render(); }
 
 /* ---- Icons ---- */
 const iconBuilding = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-3"/></svg>`;
-const iconTag      = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41 12 22l-9-9V3h10l7.59 7.59a2 2 0 0 1 0 2.82Z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>`;
-const iconCheck    = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>`;
-const iconBranch   = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-3"/></svg>`;
-const iconUser     = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>`;
-const iconLink     = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>`;
-const iconTrash    = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14"/></svg>`;
-const iconNote     = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg>`;
+const iconTag = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41 12 22l-9-9V3h10l7.59 7.59a2 2 0 0 1 0 2.82Z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>`;
+const iconCheck = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>`;
+const iconBranch = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-3"/></svg>`;
+const iconUser = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>`;
+const iconLink = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>`;
+const iconTrash = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14"/></svg>`;
+const iconNote = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg>`;
 
 document.addEventListener("DOMContentLoaded", init);
