@@ -184,6 +184,18 @@ const pencil   = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
    Dropdown-Interaktion
    ---------------------------------------------------------- */
 function setupDropdowns(){
+  const filterToggle = $("#filter-toggle");
+  if (filterToggle) filterToggle.addEventListener("click", () => {
+    const more = $(".filter-more");
+    const willOpen = !more.classList.contains("open");
+    closeAllMenus();
+    more.classList.toggle("open", willOpen);
+    filterToggle.setAttribute("aria-expanded", String(willOpen));
+  });
+
+  const filterReset = $(".filter-reset");
+  if (filterReset) filterReset.addEventListener("click", resetFilters);
+
   // Chip klick -> Menü auf/zu
   $$(".dd").forEach(dd => {
     $(".chip", dd).addEventListener("click", e => {
@@ -195,6 +207,11 @@ function setupDropdowns(){
       }
       const wasOpen = dd.classList.contains("open");
       closeAllMenus();
+      const more = dd.closest(".filter-more");
+      if (more) {
+        more.classList.add("open");
+        filterToggle.setAttribute("aria-expanded", "true");
+      }
       if (!wasOpen) dd.classList.add("open");
     });
   });
@@ -213,11 +230,16 @@ function setupDropdowns(){
       return;
     }
     // Klick außerhalb -> Menüs schließen
-    if (!e.target.closest(".dd")) closeAllMenus();
+    if (!e.target.closest(".filters")) closeAllMenus();
   });
 }
 
-function closeAllMenus(){ $$(".dd").forEach(d => d.classList.remove("open")); }
+function closeAllMenus(){
+  $$(".dd").forEach(d => d.classList.remove("open"));
+  $$(".filter-more").forEach(m => m.classList.remove("open"));
+  const toggle = $("#filter-toggle");
+  if (toggle) toggle.setAttribute("aria-expanded", "false");
+}
 
 function clearFilter(group){
   filter[group] = null;
@@ -249,6 +271,16 @@ function updateChip(group){
     labelEl.textContent = chipText(group, val);
     chip.classList.add("active");
   }
+  updateFilterCount();
+}
+
+function updateFilterCount(){
+  const count = Object.entries(filter).filter(([group, value]) => group !== "search" && value).length;
+  const toggle = $("#filter-toggle"), badge = $("#filter-count");
+  if (!toggle || !badge) return;
+  toggle.classList.toggle("active", count > 0);
+  badge.hidden = count === 0;
+  badge.textContent = `${count} aktiv`;
 }
 
 function chipText(group, val){
@@ -283,6 +315,7 @@ function init(){
   buildMenus();
   setupDropdowns();
   ["fach","standort","prio","kurs","ihk","prakt"].forEach(markSelectedOptions);
+  updateFilterCount();
   renderKpis();
   renderTable();
   if (TN[0]) selectTN(TN[0].id);

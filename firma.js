@@ -63,7 +63,7 @@ function hero(freiN) {
         <div class="hero-prio" style="gap:10px">${U.koop
       ? `<span class="pill koop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>Kooperationsvertrag</span>`
       : `<span class="pill nokoop">kein Vertrag</span>`}</div>
-        <div class="hero-amp" style="background:rgba(255,255,255,.12)">
+          <div class="hero-amp" style="background:rgba(255,255,255,.12)">
           ${freiN ? `${freiN} Platz frei` : "voll belegt"}
         </div>
         <div class="toggle ${U.aktiv ? "on" : ""}" id="aktiv-toggle" style="color:#fff">

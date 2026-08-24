@@ -260,7 +260,7 @@ button {
   font-family: inherit;
   font-size: 13.5px;
   color: var(--ink);
-  box-shadow: var(--shadow);
+  box-shadow: 0 1px 2px rgba(16, 30, 60, .03), 0 4px 14px rgba(16, 30, 60, .045);
   transition: .18s;
 }
 
@@ -469,9 +469,17 @@ button {
 }
 
 .kpi:hover {  
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(16, 30, 60, .04), 0 6px 18px rgba(16, 30, 60, .06);
 } 
+
+.kpi.primary {
+  border-color: #cfe0ff;
+}
+
+.kpi.primary .num {
+  font-size: 40px;
+}
 
 .kpi.b {
   --k: var(--blue)
@@ -645,7 +653,61 @@ button {
   margin-left: auto;
   display: flex;
   gap: 8px;
-  flex-wrap: wrap
+  flex-wrap: wrap;
+  position: relative
+}
+
+.filter-more {
+  display: none;
+  position: absolute;
+  z-index: 31;
+  top: calc(100% + 8px);
+  right: 0;
+  width: min(420px, calc(100vw - 48px));
+}
+
+.filter-more.open {
+  display: block;
+}
+
+.filter-more-menu {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+}
+
+.filter-more-head {
+  grid-column: 1/-1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+.filter-reset {
+  border: 0;
+  background: none;
+  color: var(--blue);
+  font: inherit;
+  cursor: pointer;
+}
+
+.filter-more .chip {
+  width: 100%;
+  justify-content: space-between;
+}
+
+.filter-count {
+  font-size: 11px;
+  font-weight: 500;
+  opacity: .75;
 }
 
 /* ---------- Dropdown filters ---------- */
@@ -831,11 +893,19 @@ tbody tr:hover {
 }
 
 tbody tr.sel {
-  background: var(--blue-soft)
+  background: #e3edff
 }
 
 tbody tr.sel td:first-child {
-  box-shadow: inset 3px 0 0 var(--blue)
+  box-shadow: inset 4px 0 0 var(--blue)
+}
+
+tbody tr.sel td {
+  border-bottom-color: #d3e1fb
+}
+
+tbody tr.sel .tn b {
+  color: var(--navy)
 }
 
 .tn {
@@ -1027,29 +1097,36 @@ tbody tr.sel td:first-child {
 }
 
 .detail-top {
-  padding: 20px;
+  padding: 16px 20px;
   background: linear-gradient(160deg, #16294d, #0f1f3d);
   color: #fff;
   position: relative
 }
 
+.detail-identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-right: 84px;
+}
+
 .detail-top .av {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
   background: rgba(255, 255, 255, .14);
   display: grid;
   place-items: center;
   font-family: 'Bricolage Grotesque';
   font-weight: 700;
-  font-size: 18px;
-  margin-bottom: 12px;
+  font-size: 16px;
+  margin-bottom: 0;
   border: 1px solid rgba(255, 255, 255, .18)
 }
 
 .detail-top h3 {
   font-family: 'Bricolage Grotesque';
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 700;
   letter-spacing: -.01em
 }
@@ -1255,7 +1332,7 @@ tbody tr.sel td:first-child {
 }
 
 .btn:active {
-  transform: translateY(0)
+  transform: scale(.98)
 }
 
 @keyframes rise {
@@ -2283,6 +2360,11 @@ tbody tr.inactive {
   color: var(--ink-faint)
 }
 
+#rem-kom {
+  resize: vertical;
+  min-height: 84px;
+}
+
 .fin.ro {
   background: var(--line-soft);
   color: var(--ink-soft)
@@ -2520,6 +2602,26 @@ tbody tr.inactive {
   margin: 14px 0 9px
 }
 
+.current-reminder {
+  display: grid;
+  gap: 3px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border: 1px solid #cfe0ff;
+  border-radius: 9px;
+  background: var(--blue-soft);
+}
+
+.current-reminder span,
+.current-reminder small {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+}
+
+.current-reminder b {
+  font-size: 13px;
+}
+
 /* Kontakthistorie */
 .hist {
   position: relative;
@@ -2575,6 +2677,12 @@ tbody tr.inactive {
   font-size: 13px;
   color: var(--ink-soft);
   margin-top: 3px
+}
+
+.hist-item .hist-reminder {
+  margin-top: 6px;
+  font-size: 11.5px;
+  color: var(--ink-faint);
 }
 
 .hist-add {
@@ -3338,5 +3446,24 @@ tbody tr.inactive {
 
   .frow {
     grid-template-columns: 1fr
+  }
+
+  .filter-more-menu {
+    grid-template-columns: 1fr
+  }
+}
+
+/* Keyboard feedback and a calm fallback for users who reduce motion. */
+:focus-visible {
+  outline: 3px solid var(--blue-soft);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
   }
 }

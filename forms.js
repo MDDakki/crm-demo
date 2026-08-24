@@ -143,7 +143,7 @@ function openTnForm() {
     field("IHK-Meldung", input("melde", "TT.MM.JJJJ")) +
     field("Risiko", select("risk", riskOpts, { val: "g" })) +
     field("Priorität", select("prio", [{ v: "1", t: "Prio 1" }, { v: "2", t: "Prio 2" }, { v: "3", t: "Prio 3" }], { val: "3" })) +
-    field("Praktikum", select("pstatus", [{ v: "open", t: "offen / Suche läuft" }, { v: "run", t: "läuft gerade" }], { val: "open" })) +
+    field("Praktikum", select("pstatus", [{ v: "open", t: "Suche läuft" }, { v: "run", t: "Läuft" }], { val: "open" })) +
     field("Praktikumsbetrieb", input("pBetrieb", "optional")) +
     field("Praktikum bis", input("pBis", "TT.MM.JJJJ"));
 

@@ -6,7 +6,7 @@
 
 
 const lightClass = { g:"l-g", a:"l-a", r:"l-r" };
-const riskLabel  = { g:"Grün: alles offen", a:"Gelb: 1 Risiko", r:"Rot: mehrere Risiken" };
+const riskLabel  = { g:"Grün: kein Risiko", a:"Gelb: 1 Risiko", r:"Rot: mehrere Risiken" };
 
 // Risiko-Faktoren (Ja = ein Risiko); * = mit Kommentarfeld
 const RISK_FACTORS = [
@@ -63,6 +63,18 @@ function withDefaults(t){
   if (!t.teamsLink) t.teamsLink = "#";
   if (!t.akteLink)  t.akteLink  = "#";
   return t;
+}
+
+function completeReminder(reminder, contact, nextReminder, datum){
+  return {
+    historyEntry: {
+      datum,
+      outcome: contact.outcome,
+      kommentar: contact.kommentar,
+      erinnerung: { ...reminder, done: true },
+    },
+    nextReminder: { ...nextReminder, done: false },
+  };
 }
 
 /* ---- Ampel aus Risikoanalyse berechnen ---- */
@@ -202,6 +214,11 @@ function haken(key, label, on, isPv){
 function erinnerung(){
   // ponytail: OUTCOMES ist die Dropdown-Quelle (max. 10). Endgültige Liste kommt vom Kunden, dann OUTCOMES ersetzen.
   return card("Erinnerung · nächster Schritt", iconBell, `
+    <div class="current-reminder">
+      <span>Aktuelle Erinnerung</span>
+      <b>${T.reminder.text || "Kein nächster Schritt hinterlegt"}</b>
+      <small>${[T.reminder.datum, T.reminder.betreuer].filter(Boolean).join(" · ") || "Kein Termin hinterlegt"}</small>
+    </div>
     <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px">Kontakt protokollieren</div>
     <div class="frow"><label>Art</label>
       <select class="fin" id="rem-outcome">
@@ -210,14 +227,14 @@ function erinnerung(){
       </select>
     </div>
     <div class="frow"><label>Kommentar</label>
-      <textarea class="fin full" id="rem-kom" rows="3" maxlength="300" placeholder="Was ist passiert?"></textarea>
+      <textarea class="fin full" id="rem-kom" rows="3" maxlength="300" placeholder="Was ist passiert?" required></textarea>
     </div>
     <div style="text-align:right;font-size:11px;color:var(--ink-faint);margin:-4px 0 10px"><span id="rem-count">0</span>/300</div>
     <div class="sep" style="height:1px;background:var(--line);margin:2px 0 12px"></div>
     <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px">Neue Erinnerung <span style="color:var(--red)">*</span></div>
-    ${frow("Nächster Schritt", `<input class="fin" data-bind="reminder.text" value="${T.reminder.text||''}" placeholder="z. B. Praktikumsbesuch nach 4 Wochen">`)}
-    ${frow("Betreuer", `<input class="fin" data-bind="reminder.betreuer" value="${T.reminder.betreuer||''}">`)}
-    ${frow("Fällig am", `<input class="fin" data-bind="reminder.datum" value="${T.reminder.datum||''}" placeholder="TT.MM.JJJJ">`)}
+    ${frow("Nächster Schritt", `<input class="fin" id="next-rem-text" placeholder="z. B. Praktikumsbesuch nach 4 Wochen">`)}
+    ${frow("Betreuer", `<input class="fin" id="next-rem-betreuer" placeholder="zuständige Person">`)}
+    ${frow("Fällig am", `<input class="fin" id="next-rem-date" placeholder="TT.MM.JJJJ">`)}
     <button class="btn pri" id="rem-done-btn" style="width:100%;margin-top:12px">Erledigt &amp; protokollieren</button>`);
 }
 
@@ -241,6 +258,7 @@ function fillHistList(){
     <div class="hist-item">
       <div><span class="when">${h.datum || "—"}</span><span class="out">${h.outcome}</span></div>
       <div class="kom">${(h.kommentar || "").replace(/\n/g, "<br>")}</div>
+      ${h.erinnerung ? `<div class="hist-reminder">Erledigte Erinnerung: <b>${h.erinnerung.text || "ohne nächsten Schritt"}</b>${h.erinnerung.datum ? ` · fällig ${h.erinnerung.datum}` : ""}</div>` : ""}
     </div>`).join("")}</div>`;
 
   if (all.length > HIST_LIMIT){
@@ -332,25 +350,30 @@ function wire(){
     remKom.addEventListener("input", upd); upd();
   }
 
-  // Erinnerung abschließen: aktuellen Kontakt protokollieren + neue Erinnerung erzwingen
+  // Erinnerung abschließen: Kontakt und erledigte Erinnerung archivieren, dann neue Erinnerung setzen.
   const remBtn = $("#rem-done-btn");
   if (remBtn) remBtn.addEventListener("click", () => {
     const outcome = $("#rem-outcome").value.trim();
     const kommentar = $("#rem-kom").value.trim();
+    const nextReminder = {
+      text: $("#next-rem-text").value.trim(),
+      betreuer: $("#next-rem-betreuer").value.trim(),
+      datum: $("#next-rem-date").value.trim(),
+    };
     if (!outcome){ alert("Bitte eine Art wählen."); return; }
-    // Guard: nur abschließbar, wenn eine neue Erinnerung gesetzt ist
-    if (!(T.reminder.text||"").trim() || !(T.reminder.datum||"").trim()){
+    if (!kommentar){ alert("Bitte einen Kommentar eintragen."); return; }
+    if (!nextReminder.text || !nextReminder.datum){
       alert("Bitte zuerst eine neue Erinnerung setzen (Nächster Schritt + Fällig am), bevor du abschließt.");
       return;
     }
     const p = n => String(n).padStart(2, "0"), d = new Date();
     const heute = `${p(d.getDate())}.${p(d.getMonth()+1)}.${d.getFullYear()}`;
-    T.history.unshift({ datum: heute, outcome, kommentar });
-    T.reminder.done = false; // die neu gesetzte Erinnerung ist wieder offen
+    const result = completeReminder(T.reminder, { outcome, kommentar }, nextReminder, heute);
+    T.history.unshift(result.historyEntry);
+    T.reminder = result.nextReminder;
     persist();
     logActivity(`hat einen Kontakt bei <b>${T.vn} ${T.nn}</b> protokolliert`);
-    $("#rem-outcome").value = ""; $("#rem-kom").value = ""; if (remCount) remCount.textContent = "0";
-    fillHistList();
+    render();
   });
 }
 

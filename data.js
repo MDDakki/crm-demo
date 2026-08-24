@@ -25,7 +25,7 @@ const STANDORTE = [
 ];
 
 const RISIKO = [
-  { code: "g", label: "Grün: alles offen", swatch: "var(--green)" },
+  { code: "g", label: "Grün: kein Risiko", swatch: "var(--green)" },
   { code: "a", label: "Gelb: 1 Risiko", swatch: "var(--amber)" },
   { code: "r", label: "Rot: mehrere Risiken", swatch: "var(--red)" },
 ];

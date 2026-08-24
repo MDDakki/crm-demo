@@ -148,7 +148,7 @@ function showToast(label){
     document.body.appendChild(t);
   }
   t.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg>
-    <span>Die Seite <b>${label}</b> gibt es noch nicht <span style="opacity:.7">(kommt später)</span></span>`;
+    <span>Die Seite <b>${label}</b> ist noch nicht verfügbar.</span>`;
   t.classList.add("show");
   clearTimeout(_toastTimer);
   _toastTimer = setTimeout(() => t.classList.remove("show"), 2600);

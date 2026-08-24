@@ -177,9 +177,10 @@ function selectU(id){
       <div class="toggle ${u.aktiv?'on':''}" id="aktiv-toggle" style="position:absolute;top:18px;right:18px;color:#fff">
         <span class="track"></span>${u.aktiv?'Aktiv':'Inaktiv'}
       </div>
-      <div class="av">${u.init}</div>
-      <h3>${u.name}</h3>
-      <p>${u.plz} ${u.ort}</p>
+      <div class="detail-identity">
+        <div class="av">${u.init}</div>
+        <div><h3>${u.name}</h3><p>${u.plz} ${u.ort}</p></div>
+      </div>
     </div>
 
     <div class="drows">
@@ -251,11 +252,28 @@ function renderKpis(){
 const chipDefaults = { fach:"Fachrichtung", ort:"Ort", status:"Plätze", aktiv:"Status", jahr:"Jahr" };
 
 function setupDropdowns(){
+  const filterToggle = $("#filter-toggle");
+  if (filterToggle) filterToggle.addEventListener("click", () => {
+    const more = $(".filter-more");
+    const willOpen = !more.classList.contains("open");
+    closeAllMenus();
+    more.classList.toggle("open", willOpen);
+    filterToggle.setAttribute("aria-expanded", String(willOpen));
+  });
+
+  const filterReset = $(".filter-reset");
+  if (filterReset) filterReset.addEventListener("click", resetFilters);
+
   $$(".dd").forEach(dd => {
     $(".chip", dd).addEventListener("click", e => {
       if (e.target.closest(".clear")){ e.stopPropagation(); clearFilter(dd.dataset.group); return; }
       const wasOpen = dd.classList.contains("open");
       closeAllMenus();
+      const more = dd.closest(".filter-more");
+      if (more) {
+        more.classList.add("open");
+        filterToggle.setAttribute("aria-expanded", "true");
+      }
       if (!wasOpen) dd.classList.add("open");
     });
   });
@@ -267,10 +285,15 @@ function setupDropdowns(){
       updateChip(g); markSel(g); closeAllMenus(); renderTable();
       return;
     }
-    if (!e.target.closest(".dd")) closeAllMenus();
+    if (!e.target.closest(".filters")) closeAllMenus();
   });
 }
-function closeAllMenus(){ $$(".dd").forEach(d => d.classList.remove("open")); }
+function closeAllMenus(){
+  $$(".dd").forEach(d => d.classList.remove("open"));
+  $$(".filter-more").forEach(m => m.classList.remove("open"));
+  const toggle = $("#filter-toggle");
+  if (toggle) toggle.setAttribute("aria-expanded", "false");
+}
 function clearFilter(g){ filter[g]=null; updateChip(g); markSel(g); closeAllMenus(); renderTable(); }
 function resetFilters(){
   ["fach","ort","status","aktiv","jahr"].forEach(g => { filter[g]=null; updateChip(g); markSel(g); });
@@ -286,6 +309,15 @@ function updateChip(g){
   const lbl  = $(".chip-label", chip);
   if (!filter[g]){ lbl.textContent = chipDefaults[g]; chip.classList.remove("active"); }
   else { lbl.textContent = chipText(g, filter[g]); chip.classList.add("active"); }
+  updateFilterCount();
+}
+function updateFilterCount(){
+  const count = Object.entries(filter).filter(([group, value]) => group !== "search" && value).length;
+  const toggle = $("#filter-toggle"), badge = $("#filter-count");
+  if (!toggle || !badge) return;
+  toggle.classList.toggle("active", count > 0);
+  badge.hidden = count === 0;
+  badge.textContent = `${count} aktiv`;
 }
 function markSel(g){
   $$(".opt", $(`#menu-${g}`)).forEach(o =>
@@ -297,6 +329,7 @@ function init(){
   buildMenus();
   setupDropdowns();
   ["fach","ort","status","aktiv","jahr"].forEach(markSel);
+  updateFilterCount();
   renderKpis();
   renderTable();
   if (UNTERNEHMEN[0]) selectU(UNTERNEHMEN[0].id);

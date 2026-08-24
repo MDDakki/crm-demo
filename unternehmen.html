@@ -22,13 +22,13 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
         Neues Unternehmen
       </button>
-      <button class="icon-btn"><span class="dot"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></button>
+      <button class="icon-btn" type="button" aria-label="Benachrichtigungen"><span class="dot"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></button>
     </div>
   </header>
 
   <div class="content">
     <section class="kpis">
-      <div class="kpi b">
+      <div class="kpi b primary">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-3"/></svg></div>
         <div class="num" id="kpi-total">0</div>
         <div class="lbl">Unternehmen gesamt</div>
@@ -38,7 +38,7 @@
         <div class="num" id="kpi-aktiv">0</div>
         <div class="lbl">Aktiv</div>
       </div>
-      <div class="kpi a">
+      <div class="kpi b">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg></div>
         <div class="num" id="kpi-koop">0</div>
         <div class="lbl">Mit Kooperationsvertrag</div>
@@ -88,6 +88,9 @@
               </button>
               <div class="menu" id="menu-status"></div>
             </div>
+            <div class="filter-more">
+              <div class="filter-more-menu">
+                <div class="filter-more-head"><span>Weitere Filter</span><button type="button" class="filter-reset">Zurücksetzen</button></div>
             <div class="dd" data-group="aktiv">
               <button class="chip">
                 <span class="chip-label">Status</span>
@@ -104,6 +107,9 @@
               </button>
               <div class="menu" id="menu-jahr"></div>
             </div>
+              </div>
+            </div>
+            <button class="chip filter-toggle" id="filter-toggle" type="button" aria-expanded="false">Filter <span class="filter-count" id="filter-count" hidden></span></button>
           </div>
         </div>
 

@@ -22,7 +22,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
         Neuer Teilnehmer
       </button>
-      <button class="icon-btn"><span class="dot"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></button>
+      <button class="icon-btn" type="button" aria-label="Benachrichtigungen"><span class="dot"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></button>
     </div>
   </header>
 
@@ -30,7 +30,7 @@
 
     <!-- KPI ROW -->
     <section class="kpis">
-      <div class="kpi b">
+      <div class="kpi b primary">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
         <div class="num" id="kpi-total">42</div>
         <div class="lbl">Teilnehmer in Betreuung</div>
@@ -87,6 +87,9 @@
               </button>
               <div class="menu" id="menu-standort"></div>
             </div>
+            <div class="filter-more">
+              <div class="filter-more-menu">
+                <div class="filter-more-head"><span>Weitere Filter</span><button type="button" class="filter-reset">Zurücksetzen</button></div>
             <div class="dd" data-group="prio">
               <button class="chip">
                 <span class="chip-label">Prio</span>
@@ -119,6 +122,9 @@
               </button>
               <div class="menu" id="menu-prakt"></div>
             </div>
+              </div>
+            </div>
+            <button class="chip filter-toggle" id="filter-toggle" type="button" aria-expanded="false">Filter <span class="filter-count" id="filter-count" hidden></span></button>
           </div>
         </div>
 
